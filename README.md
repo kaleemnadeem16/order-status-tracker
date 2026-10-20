@@ -1,5 +1,7 @@
 # Order Status Tracker
 
+[![Checks](https://github.com/kaleemnadeem16/order-status-tracker/actions/workflows/test.yml/badge.svg)](https://github.com/kaleemnadeem16/order-status-tracker/actions/workflows/test.yml)
+
 Plain PHP and MySQL application for staff to build order timelines and share customer tracking links and QR codes.
 
 ## Features
@@ -15,6 +17,8 @@ Plain PHP and MySQL application for staff to build order timelines and share cus
 Requires Docker Desktop with Compose. The included credentials are disposable local demo values. MySQL is not exposed on the host; the app binds only to loopback.
 
 ```sh
+git clone https://github.com/kaleemnadeem16/order-status-tracker.git
+cd order-status-tracker
 docker compose -p tracker-demo up -d --build --wait
 docker compose -p tracker-demo exec app php scripts/create-admin.php --email=admin@example.com --name="Demo Admin"
 ```
@@ -28,6 +32,8 @@ docker compose -p tracker-demo down -v
 ```
 
 ## Configuration and deployment
+
+See [DEPLOYMENT.md](DEPLOYMENT.md) for the Apache installation guide.
 
 Configuration is in `config/config.php`; environment variables override an ignored `config/config.local.php` copied from `config/config.example.php`. Set DB_HOST, DB_PORT, DB_NAME, DB_USER, DB_PASS, APP_URL and APP_ENV explicitly for deployment. APP_URL must be a trusted canonical URL. Use HTTPS, a least-privilege database account, backups and a private database network. Do not deploy the local Compose credentials. Apache needs rewrite/headers and the supplied access restrictions; other servers need equivalent rules blocking internal directories and metadata. Never expose config, database, tests, vendor, scripts, dotfiles or build configuration.
 
@@ -51,6 +57,6 @@ Portfolio/demo release. No production readiness or usage metrics are claimed. Pu
 
 The current Tailwind 3 build dependency tree has seven npm audit advisories (five high, two moderate), including braces and postcss-selector-parser. Compatible fixes were applied; the remaining automated fix requires a Tailwind 4 migration. These dependencies are build-only; do not process untrusted CSS/glob input. This migration remains follow-up work.
 
-Browser QR download/share and mobile layout require manual acceptance testing. Browser sharing depends on platform support. Fonts are requested from Google Fonts; system fallbacks work offline. GitHub Actions cannot be confirmed until publication.
+Browser QR download/share and mobile layout require manual acceptance testing. Browser sharing depends on platform support. Fonts are requested from Google Fonts; system fallbacks work offline. The checks badge links to the latest GitHub Actions results.
 
 MIT © 2026 Kaleem Nadeem. Vendored QRCode.js retains its separate notice in THIRD_PARTY_NOTICES.md; dependency licenses remain their owners'.
