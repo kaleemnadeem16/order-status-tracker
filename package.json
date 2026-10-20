@@ -1,0 +1,13 @@
+{
+  "name": "order-status-tracker",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Build-only devDependency for compiling Tailwind CSS. Nothing here runs at request time.",
+  "scripts": {
+    "build:css": "tailwindcss -i ./assets/css/input.css -o ./assets/css/app.css --minify",
+    "watch:css": "tailwindcss -i ./assets/css/input.css -o ./assets/css/app.css --watch"
+  },
+  "devDependencies": {
+    "tailwindcss": "^3.4.13"
+  }
+}

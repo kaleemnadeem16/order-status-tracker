@@ -1,0 +1,38 @@
+services:
+  app:
+    build: .
+    ports:
+      - "127.0.0.1:8092:80"
+    environment:
+      DB_HOST: db
+      DB_NAME: tracker
+      DB_USER: tracker
+      DB_PASS: local-demo-only
+      APP_URL: http://localhost:8092
+      APP_ENV: local
+    healthcheck:
+      test: ["CMD", "php", "-r", "exit(@file_get_contents('http://127.0.0.1/login.php') === false ? 1 : 0);"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    depends_on:
+      db:
+        condition: service_healthy
+  db:
+    image: mysql:8.4
+    environment:
+      MYSQL_DATABASE: tracker
+      MYSQL_USER: tracker
+      MYSQL_PASSWORD: local-demo-only
+      MYSQL_ROOT_PASSWORD: local-root-only
+    volumes:
+      - data:/var/lib/mysql
+      - ./database/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+      - ./database/seed.sql:/docker-entrypoint-initdb.d/02-seed.sql:ro
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1"]
+      interval: 5s
+      timeout: 5s
+      retries: 40
+volumes:
+  data:

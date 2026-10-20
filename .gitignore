@@ -1,0 +1,52 @@
+# Environment-specific configuration and secrets
+/config/config.local.php
+/.env
+/.env.*
+!/.env.example
+/.htpasswd
+/auth.json
+
+# Private keys and certificates
+*.key
+*.pem
+*.p12
+*.pfx
+
+# Dependencies and build caches
+/node_modules/
+/vendor/
+/.cache/
+/.parcel-cache/
+
+# Runtime data, logs, sessions, and temporary files
+*.log
+*.pid
+*.session
+/logs/
+/tmp/
+/temp/
+/storage/cache/
+/storage/logs/
+/storage/sessions/
+
+# Database exports and backups (keep the canonical schema/seed only)
+/database/*.sql
+!/database/schema.sql
+!/database/seed.sql
+/database/*.dump
+/database/*.bak
+/database/*.gz
+/database/backups/
+
+# Local editor/agent settings
+/.claude/
+/.idea/
+/.vscode/
+*.code-workspace
+
+# OS files
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+/.phpunit.cache/

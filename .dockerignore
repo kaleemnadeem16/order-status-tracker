@@ -1,0 +1,12 @@
+.git
+.env
+config/config.local.php
+node_modules
+vendor
+*.log
+.phpunit.cache
+.env.*
+*.pem
+*.key
+*.p12
+*.pfx

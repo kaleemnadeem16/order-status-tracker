@@ -1,0 +1,35 @@
+# Order Status Tracker - Order Tracking
+# Security headers + block direct access to internal folders.
+
+<IfModule mod_headers.c>
+    Header always set X-Content-Type-Options "nosniff"
+    Header always set X-Frame-Options "SAMEORIGIN"
+    Header always set Referrer-Policy "no-referrer"
+    Header always set Permissions-Policy "camera=(), microphone=(), geolocation=()"
+    Header always set Strict-Transport-Security "max-age=31536000"
+    # No 'unsafe-inline' for scripts: the UI uses delegated data-action handlers
+    # (see assets/js/app.js), never inline onclick attributes.
+    Header always set Content-Security-Policy "default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; script-src 'self'; frame-ancestors 'self'; base-uri 'self'; form-action 'self'"
+
+    # PHP pages must never be cached — a stale HTML response can pin an old
+    # CSP header or old asset URLs in the browser.
+    <FilesMatch "\.php$">
+        Header always set Cache-Control "no-store, no-cache, must-revalidate, max-age=0"
+    </FilesMatch>
+</IfModule>
+
+Options -Indexes
+ServerSignature Off
+
+# Deny direct web access to internal folders (they are only ever require()'d by PHP).
+RewriteEngine On
+RewriteRule (^|/)\.(?!well-known(?:/|$)) - [F,L]
+RewriteRule ^(config|src|database|scripts|tests|vendor|node_modules|docker)(?:/|$) - [F,L,NC]
+
+# Pretty public tracking link: /track/{token} -> t.php?k={token}. Keeps .php
+# off the customer-facing link and QR code.
+RewriteRule ^track/([A-Za-z0-9_-]+)/?$ t.php?k=$1 [L,QSA]
+
+<FilesMatch "^(Dockerfile|docker-compose\.yml|composer\.(json|lock)|package(-lock)?\.json|phpunit\.xml|.*\.md|LICENSE)$">
+    Require all denied
+</FilesMatch>

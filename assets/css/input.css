@@ -1,0 +1,254 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-neutral-50 font-sans text-ink antialiased;
+  }
+  h1, h2, h3 {
+    @apply font-serif;
+  }
+}
+
+@layer components {
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-sm px-4 py-2.5 text-sm font-medium tracking-wide transition
+           disabled:opacity-50 disabled:cursor-not-allowed select-none;
+  }
+  .btn-primary {
+    @apply btn bg-ink text-white hover:bg-neutral-800 active:bg-black;
+  }
+  .btn-secondary {
+    @apply btn bg-white text-ink border border-neutral-300 hover:border-ink;
+  }
+  .btn-danger {
+    @apply btn bg-white text-red-700 border border-red-200 hover:bg-red-50;
+  }
+  .btn-sm {
+    @apply px-3 py-1.5 text-xs;
+  }
+  .input {
+    @apply w-full rounded-sm border border-neutral-300 bg-white px-3 py-2.5 text-sm text-ink
+           placeholder:text-neutral-400 focus:border-ink focus:outline-none focus:ring-1 focus:ring-ink;
+  }
+  .select-input {
+    appearance: none;
+    padding-right: 2.5rem;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3E%3Cpath stroke='%23525252' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3E%3C/svg%3E");
+    background-position: right 0.75rem center;
+    background-repeat: no-repeat;
+    background-size: 1.1rem 1.1rem;
+  }
+  .label {
+    @apply mb-1.5 block text-xs font-medium uppercase tracking-wider text-neutral-500;
+  }
+  .card {
+    @apply rounded-sm border border-neutral-200 bg-white;
+  }
+  .badge {
+    @apply inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium;
+  }
+  .badge-done {
+    @apply badge bg-emerald-50 text-emerald-700 ring-1 ring-inset ring-emerald-200;
+  }
+  .badge-pending {
+    @apply badge bg-neutral-100 text-neutral-600 ring-1 ring-inset ring-neutral-200;
+  }
+  .badge-admin {
+    @apply badge bg-ink text-white;
+  }
+  .nav-link {
+    @apply rounded-sm px-3 py-2 text-sm font-medium text-neutral-600 hover:bg-neutral-100 hover:text-ink;
+  }
+  .nav-link-active {
+    @apply nav-link bg-neutral-100 text-ink;
+  }
+  .modal-backdrop {
+    @apply fixed inset-0 z-40 flex items-end sm:items-center justify-center bg-black/50 p-0 sm:p-4;
+  }
+  .modal-panel {
+    @apply card w-full sm:max-w-lg max-h-[92vh] overflow-y-auto rounded-t-lg sm:rounded-sm p-5 sm:p-6;
+  }
+  .toast {
+    @apply fixed bottom-4 left-1/2 z-50 -translate-x-1/2 rounded-sm bg-ink px-4 py-3 text-sm text-white shadow-lg;
+  }
+
+  /* Shared admin/public order timeline. The SVG track occupies its own layer
+     and row turns live in the outer gutter, never behind step copy. */
+  .snake-timeline {
+    @apply w-full;
+  }
+  .snake-timeline-wrap {
+    @apply relative isolate w-full overflow-hidden rounded-none border border-black/10 bg-white;
+    background-image: linear-gradient(180deg, #fff 0%, #fdfdfd 100%);
+  }
+  .snake-timeline-wrap--desktop {
+    padding-inline: var(--snake-gutter);
+    padding-block: 0.75rem;
+  }
+  .snake-timeline-wrap--mobile {
+    padding-inline: var(--snake-gutter);
+    padding-block: 0.5rem;
+  }
+  .snake-grid {
+    @apply relative z-10 grid;
+  }
+  .snake-timeline-meta {
+    @apply relative z-20 flex items-center justify-between border-b border-black/10 px-5 py-3 font-mono text-[9px] font-medium uppercase tracking-[0.24em] text-neutral-500;
+  }
+  .snake-timeline-meta span:last-child {
+    @apply tracking-[0.16em] text-black;
+  }
+  .snake-timeline-wrap--desktop .snake-grid,
+  .snake-timeline-wrap--mobile .snake-grid {
+    grid-template-columns: repeat(var(--snake-columns), minmax(0, 1fr));
+  }
+  .snake-step {
+    @apply relative min-w-0;
+  }
+  .snake-timeline-wrap--desktop .snake-step {
+    @apply flex min-h-[158px] flex-col items-center px-3 pb-8 pt-7 text-center;
+  }
+  .snake-timeline-wrap--mobile .snake-step {
+    @apply flex min-h-[154px] flex-col items-center px-1 pb-7 pt-6 text-center;
+  }
+  .snake-step-marker {
+    @apply relative z-20 shrink-0 transition duration-200;
+  }
+  .snake-step-marker::after {
+    content: '';
+    @apply pointer-events-none absolute rounded-full opacity-0;
+    inset: -7px;
+    border: 1px solid rgb(0 0 0 / 0.42);
+  }
+  .snake-step-marker--done {
+    border-color: #000 !important;
+    background: #000 !important;
+    color: #fff !important;
+    box-shadow: none !important;
+  }
+  .snake-step-marker--pending {
+    border-color: rgb(0 0 0 / 0.22) !important;
+    background: #fff !important;
+  }
+  .snake-step-marker--current {
+    box-shadow: 0 0 0 5px rgb(0 0 0 / 0.08) !important;
+  }
+  .snake-step-marker--current::after {
+    animation: snake-node-pulse 2.2s ease-out infinite;
+  }
+  .snake-step-marker--interactive:hover {
+    transform: scale(1.1);
+  }
+  .snake-step-marker--interactive:focus-visible {
+    @apply outline-none ring-2 ring-black ring-offset-2;
+  }
+  .snake-step-copy {
+    @apply relative z-10 min-w-0 border-0 bg-transparent px-2 py-2;
+    box-shadow: none;
+  }
+  .snake-step-copy::before {
+    content: '';
+    display: block;
+    width: 24px;
+    height: 1px;
+    margin: 0 auto 10px;
+    background: rgb(0 0 0 / 0.18);
+    transition: width 300ms ease, background-color 300ms ease;
+  }
+  .snake-timeline-wrap--desktop .snake-step-copy {
+    @apply w-full max-w-[196px];
+  }
+  .snake-timeline-wrap--mobile .snake-step-copy {
+    @apply w-full px-1.5 py-2;
+  }
+  .snake-timeline-wrap--mobile .snake-step-title {
+    font-size: 0.98rem !important;
+  }
+  .snake-step--done .snake-step-copy::before {
+    background: #000;
+  }
+  .snake-step--current .snake-step-copy::before {
+    width: 42px;
+    background: #000;
+  }
+  .snake-step-marker--pending {
+    @apply font-mono text-[10px] font-medium text-neutral-500;
+  }
+  .snake-step-title {
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    font-size: 1.08rem !important;
+    font-weight: 400 !important;
+    line-height: 1.15;
+    letter-spacing: -0.01em;
+  }
+  .snake-step-meta {
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 8.5px !important;
+    line-height: 1.5;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+  .snake-step-description {
+    @apply max-w-[30ch] text-xs leading-relaxed;
+  }
+  .snake-step-message {
+    @apply rounded-none border-black/10 bg-white font-serif text-[15px] italic;
+  }
+  .snake-connectors {
+    @apply pointer-events-none absolute inset-0 z-0 h-full w-full overflow-visible;
+  }
+  .snake-connector {
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    vector-effect: non-scaling-stroke;
+  }
+  .snake-connector--base {
+    stroke: #dedede;
+    stroke-width: 2;
+  }
+  .snake-connector--progress {
+    stroke: #000;
+    stroke-width: 2;
+  }
+  .snake-connector--active {
+    stroke: #000;
+    stroke-dasharray: 5 10;
+    stroke-width: 3;
+    animation: snake-flow 1.3s linear infinite;
+    filter: none;
+  }
+  .snake-gap {
+    @apply absolute z-30;
+    transform: translate(-50%, -50%);
+    border-radius: 0 !important;
+    border-color: #000 !important;
+    border-style: solid !important;
+    background: #fff !important;
+    color: #000 !important;
+  }
+  .modal-backdrop {
+    overscroll-behavior: contain;
+  }
+}
+
+@keyframes snake-flow {
+  to { stroke-dashoffset: -32; }
+}
+
+@keyframes snake-node-pulse {
+  0% { opacity: 0.75; transform: scale(0.72); }
+  70%, 100% { opacity: 0; transform: scale(1.35); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .snake-connector--active,
+  .snake-step-marker--current::after {
+    animation: none;
+  }
+  .snake-step-marker--current::after {
+    opacity: 0.45;
+  }
+}
