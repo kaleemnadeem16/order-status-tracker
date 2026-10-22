@@ -1,20 +1,31 @@
 # Order Status Tracker
 
-[![Checks](https://github.com/kaleemnadeem16/order-status-tracker/actions/workflows/test.yml/badge.svg)](https://github.com/kaleemnadeem16/order-status-tracker/actions/workflows/test.yml)
+[![Checks](https://github.com/kaleemnadeem16/order-status-tracker/actions/workflows/test.yml/badge.svg)](https://github.com/kaleemnadeem16/order-status-tracker/actions/workflows/test.yml) [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
-Plain PHP and MySQL application for staff to build order timelines and share customer tracking links and QR codes.
+Staff build order timelines in a plain PHP and MySQL app and share a private tracking link or QR code with each customer.
+
+**Status:** Beta. A reference implementation: tested in CI, not run in production. See Known limitations before storing real data. Run locally with Docker; there is no hosted demo.
 
 ## Features
 
-- Administrator and staff accounts; staff access their own orders, administrators access all orders.
+- Administrator and staff accounts: staff see their own orders, administrators see all.
 - Reusable status templates, custom timeline steps, durations and dated progress.
-- Customer tracking page with a random bearer token and a no-JavaScript fallback.
-- QR link display/download/share and token regeneration to revoke an old link.
+- Customer tracking page behind a random bearer token, with a no-JavaScript fallback.
+- QR code display, download and share; token regeneration revokes an old link.
 - Password changes, CSRF protection and account login lockouts.
+
+## Stack
+
+| Layer | Tech |
+|---|---|
+| App | Plain PHP (no framework), Apache |
+| Data | MySQL |
+| Frontend | Tailwind CSS (built with npm), vendored QRCode.js |
+| Tooling | Docker Compose, Composer tests, GitHub Actions |
 
 ## Run locally
 
-Requires Docker Desktop with Compose. The included credentials are disposable local demo values. MySQL is not exposed on the host; the app binds only to loopback.
+Requires Docker Desktop with Compose. The included credentials are disposable local demo values. MySQL is not exposed on the host and the app binds only to loopback.
 
 ```sh
 git clone https://github.com/kaleemnadeem16/order-status-tracker.git
@@ -23,21 +34,24 @@ docker compose -p tracker-demo up -d --build --wait
 docker compose -p tracker-demo exec app php scripts/create-admin.php --email=admin@example.com --name="Demo Admin"
 ```
 
-Open http://localhost:8092/login.php. Use the generated temporary password and change it under My Account. Create an order with synthetic values such as `DEMO-1024`, add timeline steps, save, then open its tracking link. The schema and six generic status templates load automatically on the first database start. No users or orders are seeded.
+Open http://localhost:8092/login.php and sign in with the generated temporary password, then change it under My Account. Create an order with a synthetic value such as `DEMO-1024`, add timeline steps, save, and open its tracking link. The schema and six generic status templates load on first database start; no users or orders are seeded.
 
-If port 8092 changes, change both the Compose port and APP_URL, then recreate the app container. To remove this demo and its database:
+If you change port 8092, change both the Compose port and `APP_URL`, then recreate the app container. To remove the demo and its database:
 
 ```sh
 docker compose -p tracker-demo down -v
 ```
 
-## Configuration and deployment
+## Configuration
 
-See [DEPLOYMENT.md](DEPLOYMENT.md) for the Apache installation guide.
+Settings are in `config/config.php`. Environment variables override an ignored `config/config.local.php` (copy `config/config.example.php`). For deployment set `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER`, `DB_PASS`, `APP_URL` and `APP_ENV` explicitly. `APP_URL` must be a trusted canonical URL. The Apache installation guide is [DEPLOYMENT.md](DEPLOYMENT.md).
 
-Configuration is in `config/config.php`; environment variables override an ignored `config/config.local.php` copied from `config/config.example.php`. Set DB_HOST, DB_PORT, DB_NAME, DB_USER, DB_PASS, APP_URL and APP_ENV explicitly for deployment. APP_URL must be a trusted canonical URL. Use HTTPS, a least-privilege database account, backups and a private database network. Do not deploy the local Compose credentials. Apache needs rewrite/headers and the supplied access restrictions; other servers need equivalent rules blocking internal directories and metadata. Never expose config, database, tests, vendor, scripts, dotfiles or build configuration.
+## Security notes
 
-Session cookies use HttpOnly, SameSite=Lax and Secure when HTTPS is configured. Enable TRUST_PROXY_HEADERS only behind a trusted proxy. The public token contains 32 random bytes; it grants access to that order without login. Anyone holding the link can read its timeline. Keep personal data out of timeline messages, revoke leaked links, and exclude tracking URLs/query strings from access logs, analytics and error reports. The included Apache image suppresses access logs. Referrer-Policy is no-referrer.
+- Use HTTPS, a least-privilege database account, backups and a private database network. Do not deploy the local Compose credentials.
+- Apache needs rewrite and headers modules and the supplied access restrictions. Other servers need equivalent rules blocking config, database, tests, vendor, scripts, dotfiles and build files.
+- Session cookies are HttpOnly, SameSite=Lax, and Secure when HTTPS is configured. Enable `TRUST_PROXY_HEADERS` only behind a trusted proxy.
+- The public token holds 32 random bytes and grants read access to that order without login. Keep personal data out of timeline messages, revoke leaked links, and keep tracking URLs out of access logs, analytics and error reports. The bundled Apache image suppresses access logs; Referrer-Policy is `no-referrer`.
 
 ## Development and verification
 
@@ -49,14 +63,24 @@ docker compose -p tracker-demo exec app composer test
 docker compose -p tracker-demo exec app php tests/http-smoke.php
 ```
 
-Run tests only against the disposable local database. HTTP smoke tests create a temporary administrator through the CLI, log in, create an order, open/revoke its public link, check blocked files and CSRF/logout, and exercise the throttle. Test records are deleted afterward. The throttle test can temporarily return 429 to requests from the same peer; wait one minute afterward. GitHub Actions uses GitHub-hosted Ubuntu runners to build CSS, lint PHP and run these checks in Docker.
+Run tests only against the disposable local database. The HTTP smoke test creates a temporary administrator through the CLI, logs in, creates an order, opens and revokes its public link, checks blocked files, CSRF and logout, and exercises the throttle; its records are deleted afterwards. The throttle check can briefly return 429 to requests from the same peer, so wait a minute afterwards. GitHub Actions builds the CSS, lints PHP and runs these checks in Docker on GitHub-hosted Ubuntu runners.
 
-## Status and limitations
+## Known limitations
 
-Portfolio/demo release. No production readiness or usage metrics are claimed. Public tracking is limited to 60 requests per peer IP per minute using locked files in the container temporary directory. This is a single-host throttle: reverse proxies share an IP bucket, restarts reset it, and multi-instance deployments need a shared edge limiter. Apply edge protection to login too; current login lockout is per account. Global status templates/settings are editable by authenticated staff. Date-driven completion currently uses Asia/Karachi. Password resets do not revoke other existing sessions. There is no email recovery, MFA, audit trail or automated backup/retention policy. Review these before storing real data.
+- Public tracking is limited to 60 requests per peer IP per minute using locked files in the container temp directory. It is a single-host throttle: proxies share an IP bucket, restarts reset it, and multi-instance setups need a shared edge limiter. Login lockout is per account, so add edge protection to login too.
+- Global status templates and settings are editable by authenticated staff.
+- Date-driven completion uses Asia/Karachi.
+- Password resets do not revoke other sessions. There is no email recovery, MFA, audit trail or automated backup and retention policy.
+- Browser QR download/share and the mobile layout still need manual acceptance testing. Sharing depends on platform support.
+- Fonts load from Google Fonts; system fallbacks work offline.
+- The Tailwind 3 build tree has seven npm audit advisories (five high, two moderate). Compatible fixes are applied; the remainder needs a Tailwind 4 migration. They are build-only, so do not feed untrusted CSS or glob input to the build.
 
-The current Tailwind 3 build dependency tree has seven npm audit advisories (five high, two moderate), including braces and postcss-selector-parser. Compatible fixes were applied; the remaining automated fix requires a Tailwind 4 migration. These dependencies are build-only; do not process untrusted CSS/glob input. This migration remains follow-up work.
+## Roadmap
 
-Browser QR download/share and mobile layout require manual acceptance testing. Browser sharing depends on platform support. Fonts are requested from Google Fonts; system fallbacks work offline. The checks badge links to the latest GitHub Actions results.
+- Migrate to Tailwind 4 to clear the remaining advisories.
+- Manual QR and mobile acceptance pass.
+- Shared (edge) rate limiting and session revocation on password reset.
 
-MIT © 2026 Kaleem Nadeem. Vendored QRCode.js retains its separate notice in THIRD_PARTY_NOTICES.md; dependency licenses remain their owners'.
+## License
+
+MIT, see [LICENSE](LICENSE). Vendored QRCode.js keeps its own notice in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md); dependency licences remain with their owners.
